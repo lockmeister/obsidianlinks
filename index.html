@@ -281,6 +281,35 @@
             opacity: 1;
         }
 
+        /* Collapsible sections */
+        .collapsible-header {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .collapsible-header::before {
+            content: "▼";
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+        }
+
+        .collapsible-header.collapsed::before {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+        }
+
         footer {
             text-align: center;
             margin-top: 2rem;
@@ -319,21 +348,33 @@
 
                 <div class="info-grid" style="margin-top: 1rem;">
                     <div class="info-box">
-                        <h3>How to use</h3>
-                        <ul>
-                            <li>In Obsidian: run "Copy Obsidian URL"</li>
-                            <li>Paste below to get an HTTPS link</li>
-                            <li>Share that link in Google Tasks, GitHub issues, emails, etc.</li>
-                        </ul>
+                        <h3 class="collapsible-header collapsed" onclick="toggleCollapse(this)">How to use</h3>
+                        <div class="collapsible-content collapsed">
+                            <ul>
+                                <li><strong>Option 1 (Easiest):</strong> Install the Obsidian plugin
+                                    <ol style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                        <li>Download the plugin files from <a href="https://github.com/mitre/obsidianlinks/tree/master/.obsidian/plugins/copy-redirect-link" target="_blank">GitHub</a></li>
+                                        <li>Copy the folder to your vault's <code>.obsidian/plugins/</code> directory</li>
+                                        <li>Restart Obsidian and enable the plugin in Settings → Community plugins</li>
+                                        <li>Set a hotkey in Settings → Hotkeys → "Copy HTTPS redirect link"</li>
+                                        <li>Press your hotkey in any note to copy the link</li>
+                                    </ol>
+                                </li>
+                                <li style="margin-top: 0.75rem;"><strong>Option 2 (Manual):</strong> In Obsidian, run "Copy Obsidian URL", paste below to get an HTTPS link</li>
+                                <li style="margin-top: 0.5rem;">Share the link in Google Tasks, GitHub issues, emails, etc.</li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="info-box">
-                        <h3>How it works</h3>
-                        <ul>
-                            <li>You share: <code>https://THIS_DOMAIN/open?...</code></li>
-                            <li>Recipient clicks the link</li>
-                            <li>Browser redirects to <code>obsidian://open?...</code></li>
-                            <li>Obsidian opens the note</li>
-                        </ul>
+                        <h3 class="collapsible-header collapsed" onclick="toggleCollapse(this)">How it works</h3>
+                        <div class="collapsible-content collapsed">
+                            <ul>
+                                <li>You share: <code>https://THIS_DOMAIN/open?...</code></li>
+                                <li>Recipient clicks the link</li>
+                                <li>Browser redirects to <code>obsidian://open?...</code></li>
+                                <li>Obsidian opens the note</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -360,7 +401,8 @@
 
             <!-- Link Builder Tool -->
             <section class="tool-section">
-                <h2>Build Link</h2>
+                <h2 class="collapsible-header collapsed" onclick="toggleCollapse(this)">Build Link</h2>
+                <div class="collapsible-content collapsed">
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Don't have an obsidian:// link? Build one from scratch.</p>
 
                 <div class="toggle-group">
@@ -405,6 +447,7 @@
                         <button onclick="copyBuilderHttps()">Copy HTTPS Link<span id="builder-https-feedback" class="copy-feedback">✓ Copied</span></button>
                         <button class="btn-secondary" onclick="copyBuilderObsidian()">Copy Obsidian Link<span id="builder-obsidian-feedback" class="copy-feedback">✓ Copied</span></button>
                     </div>
+                </div>
                 </div>
             </section>
 
@@ -613,8 +656,28 @@
             setTimeout(() => feedback.classList.remove('show'), 1500);
         }
 
+        // Collapsible sections
+        function toggleCollapse(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            if (content && content.classList.contains('collapsible-content')) {
+                content.classList.toggle('collapsed');
+                if (!content.classList.contains('collapsed')) {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            }
+        }
+
+        // Initialize collapsible content heights on load
+        function initCollapsibles() {
+            document.querySelectorAll('.collapsible-content:not(.collapsed)').forEach(content => {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            });
+        }
+
         // Initialize on load
         init();
+        initCollapsibles();
 
         // Register service worker for PWA support
         if ('serviceWorker' in navigator) {

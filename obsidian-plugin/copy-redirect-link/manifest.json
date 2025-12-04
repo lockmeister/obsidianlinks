@@ -1,0 +1,9 @@
+{
+  "id": "copy-redirect-link",
+  "name": "Copy Redirect Link",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Copy HTTPS redirect link for current note",
+  "author": "You",
+  "isDesktopOnly": false
+}
