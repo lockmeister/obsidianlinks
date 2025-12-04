@@ -400,8 +400,19 @@
     </div>
 
     <script>
-        // Configuration - UPDATE THIS to your GitHub Pages URL
-        const BASE_URL = window.location.origin;
+        // Configuration - auto-detect base URL for GitHub Pages
+        // Handles: github.io/reponame/ or custom domains
+        const getBaseUrl = () => {
+            const path = window.location.pathname;
+            // Check if we're on github.io with a repo subpath
+            if (window.location.hostname.includes('github.io')) {
+                const match = path.match(/^\/([^/]+)/);
+                return match ? window.location.origin + '/' + match[1] : window.location.origin;
+            }
+            // Custom domain - no subpath needed
+            return window.location.origin;
+        };
+        const BASE_URL = getBaseUrl();
 
         let currentLinkType = 'open';
         let currentObsidianUrl = '';
@@ -411,12 +422,18 @@
 
         // Check if we're handling a redirect
         function init() {
-            const path = window.location.pathname;
+            const fullPath = window.location.pathname;
             const search = window.location.search;
 
+            // Strip base path to get the action path
+            // e.g., /obsidianlinks/open -> /open
+            const basePath = fullPath.includes('/obsidianlinks')
+                ? fullPath.replace(/^.*\/obsidianlinks/, '')
+                : fullPath;
+
             // Check for redirect paths
-            if (path === '/open' || path === '/adv-uri' || path === '/advanced-uri') {
-                const obsidianUrl = 'obsidian:/' + path + search;
+            if (basePath === '/open' || basePath === '/adv-uri' || basePath === '/advanced-uri') {
+                const obsidianUrl = 'obsidian:/' + basePath + search;
                 handleRedirect(obsidianUrl);
             } else if (search && (search.includes('vault=') || search.includes('file='))) {
                 // Handle legacy format: /?vault=X&file=Y
