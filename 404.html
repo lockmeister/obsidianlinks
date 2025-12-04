@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Convert Obsidian links to HTTPS links for sharing in Google Tasks, GitHub, Slack, and more">
+    <meta name="description" content="Convert Obsidian links to HTTPS links for sharing in Google Tasks, GitHub, Slack, and more. Install the plugin for instant hotkey access.">
     <meta name="theme-color" content="#7c3aed">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -346,34 +346,58 @@
                 <h2>What is this?</h2>
                 <p>Many apps (Google Tasks, GitHub, Slack, etc.) only make <code>https://</code> links clickable. Obsidian uses <code>obsidian://</code> links, which get ignored. This tool converts your Obsidian links to HTTPS links that redirect back to Obsidian.</p>
 
+                <div style="background: rgba(124, 58, 237, 0.1); border-left: 3px solid var(--accent); padding: 0.75rem; margin: 1rem 0; font-size: 0.9rem;">
+                    <strong>Tip:</strong> Install the Obsidian plugin for instant hotkey access. This website is useful for manual conversion or if you don't have the plugin installed.
+                </div>
+
                 <div class="info-grid" style="margin-top: 1rem;">
                     <div class="info-box">
                         <h3 class="collapsible-header collapsed" onclick="toggleCollapse(this)">How to use</h3>
                         <div class="collapsible-content collapsed">
-                            <ul>
-                                <li><strong>Option 1 (Easiest):</strong> Install the Obsidian plugin
-                                    <ol style="margin-top: 0.5rem; margin-left: 1.5rem;">
-                                        <li>Download the plugin files from <a href="https://github.com/mitre/obsidianlinks/tree/master/.obsidian/plugins/copy-redirect-link" target="_blank">GitHub</a></li>
-                                        <li>Copy the folder to your vault's <code>.obsidian/plugins/</code> directory</li>
-                                        <li>Restart Obsidian and enable the plugin in Settings → Community plugins</li>
-                                        <li>Set a hotkey in Settings → Hotkeys → "Copy HTTPS redirect link"</li>
-                                        <li>Press your hotkey in any note to copy the link</li>
-                                    </ol>
+                            <p style="margin-bottom: 0.75rem;"><strong>With plugin installed:</strong></p>
+                            <ol style="margin-left: 1.25rem; margin-bottom: 1rem;">
+                                <li>In Obsidian: Press your hotkey (e.g., <code>Cmd+Shift+L</code>)</li>
+                                <li>Paste link in Google Tasks, GitHub, Slack, etc.</li>
+                            </ol>
+
+                            <p style="margin-bottom: 0.75rem;"><strong>Without plugin:</strong></p>
+                            <ol style="margin-left: 1.25rem;">
+                                <li>In Obsidian: Click three dots (top right) → "Copy Obsidian URL" or "Copy Advanced URI" (either works)
+                                    <div style="margin-top: 0.5rem; text-align: center;">
+                                        <img src="./obsidian-menu.png" alt="Obsidian menu showing Copy Obsidian URL option" style="max-width: 200px; border: 1px solid var(--border); border-radius: 4px;">
+                                    </div>
+                                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;"><em>Note: Advanced URI offers extra automation features (appending content, running commands), but for just opening notes, both work the same.</em></p>
                                 </li>
-                                <li style="margin-top: 0.75rem;"><strong>Option 2 (Manual):</strong> In Obsidian, run "Copy Obsidian URL", paste below to get an HTTPS link</li>
-                                <li style="margin-top: 0.5rem;">Share the link in Google Tasks, GitHub issues, emails, etc.</li>
-                            </ul>
+                                <li style="margin-top: 0.5rem;">Paste link below in "Convert Link" section</li>
+                                <li>Copy the HTTPS version and share it</li>
+                            </ol>
                         </div>
                     </div>
                     <div class="info-box">
                         <h3 class="collapsible-header collapsed" onclick="toggleCollapse(this)">How it works</h3>
                         <div class="collapsible-content collapsed">
-                            <ul>
+                            <ol style="margin-left: 1.25rem;">
                                 <li>You share: <code>https://THIS_DOMAIN/open?...</code></li>
                                 <li>Recipient clicks the link</li>
                                 <li>Browser redirects to <code>obsidian://open?...</code></li>
                                 <li>Obsidian opens the note</li>
-                            </ul>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-grid" style="margin-top: 1rem;">
+                    <div class="info-box" style="grid-column: 1 / -1;">
+                        <h3 class="collapsible-header collapsed" onclick="toggleCollapse(this)">Optional: Install plugin for instant link creation</h3>
+                        <div class="collapsible-content collapsed">
+                            <p style="margin-bottom: 0.75rem;">Skip the manual conversion by installing the plugin:</p>
+                            <ol style="margin-left: 1.25rem;">
+                                <li>Download the plugin files from <a href="https://github.com/mitre/obsidianlinks/tree/master/obsidian-plugin/copy-redirect-link" target="_blank">GitHub</a></li>
+                                <li>Copy the folder to your vault's <code>.obsidian/plugins/</code> directory</li>
+                                <li>Restart Obsidian and enable the plugin in Settings → Community plugins</li>
+                                <li>Set a hotkey in Settings → Hotkeys → "Copy HTTPS redirect link"</li>
+                                <li>Press your hotkey in any note to copy the link instantly</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
