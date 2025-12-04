@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Convert Obsidian links to HTTPS links for sharing in Google Tasks, GitHub, Slack, and more">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ObsLinks">
+    <link rel="manifest" href="./manifest.json">
+    <title>Obsidian Link Redirector</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --surface: #16213e;
+            --border: #0f3460;
+            --text: #eaeaea;
+            --text-muted: #a0a0a0;
+            --accent: #7c3aed;
+            --accent-hover: #6d28d9;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 span { color: var(--accent); }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Info Section */
+        .info-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-section h2 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--accent);
+        }
+
+        .info-section p, .info-section li {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .info-section ul {
+            margin-left: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .info-section li { margin-bottom: 0.25rem; }
+
+        .info-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 600px) {
+            .info-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .info-box h3 {
+            font-size: 0.85rem;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+
+        code {
+            background: var(--bg);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--accent);
+        }
+
+        .security-note {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid var(--warning);
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        /* Tools Section */
+        .tool-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-section h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: monospace;
+        }
+
+        .input-row {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 500px) {
+            .input-row-2 { grid-template-columns: 1fr 1fr; }
+            .input-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: var(--accent-hover); }
+
+        .btn-secondary {
+            background: var(--border);
+        }
+
+        .btn-secondary:hover { background: #1a4a7a; }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .output-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .output-box.success { border-color: var(--success); }
+
+        .hidden { display: none !important; }
+
+        /* Toggle */
+        .toggle-group {
+            display: flex;
+            background: var(--bg);
+            border-radius: 6px;
+            padding: 0.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 0.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Redirect Banner */
+        .redirect-banner {
+            background: var(--surface);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .redirect-banner h2 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .redirect-banner .output-box {
+            text-align: left;
+            margin: 0.75rem 0;
+            font-size: 0.8rem;
+        }
+
+        .redirect-banner .btn-group {
+            justify-content: center;
+            margin-top: 0.75rem;
+        }
+
+        .redirect-banner button {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Copy feedback */
+        .copy-feedback {
+            display: inline-block;
+            margin-left: 0.5rem;
+            color: var(--success);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .copy-feedback.show {
+            opacity: 1;
+        }
+
+        /* Collapsible sections */
+        .collapsible-header {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .collapsible-header::before {
+            content: "▼";
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+        }
+
+        .collapsible-header.collapsed::before {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        footer a { color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Obsidian <span>Link Redirector</span></h1>
+            <p class="tagline">Make Obsidian links clickable anywhere</p>
+        </header>
+
+        <!-- Redirect Banner (shown when redirecting) -->
+        <div id="redirect-banner" class="redirect-banner hidden">
+            <h2>Opening Obsidian...</h2>
+            <p id="redirect-status">If nothing happened, Obsidian may not be installed or the link didn't trigger.</p>
+            <div class="output-box" id="redirect-link"></div>
+            <div class="btn-group">
+                <button onclick="copyRedirectLink()">Copy Link</button>
+                <button class="btn-secondary" onclick="retryRedirect()">Try Again</button>
+            </div>
+        </div>
+
+        <!-- Main UI -->
+        <div id="main-ui">
+
+            <!-- Info Section -->
+            <section class="info-section">
+                <h2>What is this?</h2>
+                <p>Many apps (Google Tasks, GitHub, Slack, etc.) only make <code>https://</code> links clickable. Obsidian uses <code>obsidian://</code> links, which get ignored. This tool converts your Obsidian links to HTTPS links that redirect back to Obsidian.</p>
+
+                <div class="info-grid" style="margin-top: 1rem;">
+                    <div class="info-box">
+                        <h3 class="collapsible-header collapsed" onclick="toggleCollapse(this)">How to use</h3>
+                        <div class="collapsible-content collapsed">
+                            <ul>
+                                <li><strong>Option 1 (Easiest):</strong> Install the Obsidian plugin
+                                    <ol style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                        <li>Download the plugin files from <a href="https://github.com/mitre/obsidianlinks/tree/master/.obsidian/plugins/copy-redirect-link" target="_blank">GitHub</a></li>
+                                        <li>Copy the folder to your vault's <code>.obsidian/plugins/</code> directory</li>
+                                        <li>Restart Obsidian and enable the plugin in Settings → Community plugins</li>
+                                        <li>Set a hotkey in Settings → Hotkeys → "Copy HTTPS redirect link"</li>
+                                        <li>Press your hotkey in any note to copy the link</li>
+                                    </ol>
+                                </li>
+                                <li style="margin-top: 0.75rem;"><strong>Option 2 (Manual):</strong> In Obsidian, run "Copy Obsidian URL", paste below to get an HTTPS link</li>
+                                <li style="margin-top: 0.5rem;">Share the link in Google Tasks, GitHub issues, emails, etc.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <h3 class="collapsible-header collapsed" onclick="toggleCollapse(this)">How it works</h3>
+                        <div class="collapsible-content collapsed">
+                            <ul>
+                                <li>You share: <code>https://THIS_DOMAIN/open?...</code></li>
+                                <li>Recipient clicks the link</li>
+                                <li>Browser redirects to <code>obsidian://open?...</code></li>
+                                <li>Obsidian opens the note</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="security-note">
+                    <strong>Security:</strong> Links contain vault and file names in the URL. Only share links to notes you're comfortable exposing the titles of. No note <em>content</em> is transmitted - just metadata to locate the note.
+                </div>
+            </section>
+
+            <!-- Converter Tool -->
+            <section class="tool-section">
+                <h2>Convert Link</h2>
+                <label for="obsidian-input">Paste your <code>obsidian://</code> link</label>
+                <textarea id="obsidian-input" placeholder="obsidian://open?vault=MyVault&file=My%20Note"></textarea>
+                <div class="btn-group">
+                    <button onclick="convertLink()">Convert to HTTPS</button>
+                    <button class="btn-secondary" onclick="clearConverter()">Clear</button>
+                </div>
+                <div id="converter-output" class="output-box hidden"></div>
+                <div id="converter-actions" class="btn-group hidden" style="margin-top: 0.5rem;">
+                    <button onclick="copyConverterResult()">Copy Link<span id="converter-copy-feedback" class="copy-feedback">✓ Copied</span></button>
+                    <button class="btn-secondary" onclick="testConverterLink()">Test Link</button>
+                </div>
+            </section>
+
+            <!-- Link Builder Tool -->
+            <section class="tool-section">
+                <h2 class="collapsible-header collapsed" onclick="toggleCollapse(this)">Build Link</h2>
+                <div class="collapsible-content collapsed">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Don't have an obsidian:// link? Build one from scratch.</p>
+
+                <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="setLinkType('open')">Standard (open)</button>
+                    <button class="toggle-btn" onclick="setLinkType('adv-uri')">Advanced URI</button>
+                </div>
+
+                <div class="input-row input-row-2">
+                    <div>
+                        <label for="vault">Vault name *</label>
+                        <input type="text" id="vault" placeholder="MyVault">
+                    </div>
+                    <div>
+                        <label for="filepath">File path *</label>
+                        <input type="text" id="filepath" placeholder="folder/My Note">
+                    </div>
+                </div>
+
+                <div class="input-row input-row-3">
+                    <div>
+                        <label for="heading">Heading</label>
+                        <input type="text" id="heading" placeholder="Section name">
+                    </div>
+                    <div>
+                        <label for="block">Block ID</label>
+                        <input type="text" id="block" placeholder="block-id">
+                    </div>
+                    <div id="uid-field">
+                        <label for="uid">UID</label>
+                        <input type="text" id="uid" placeholder="note-uid">
+                    </div>
+                </div>
+
+                <button onclick="buildLink()">Generate Links</button>
+
+                <div id="builder-output" class="hidden" style="margin-top: 1rem;">
+                    <label>Obsidian link:</label>
+                    <div id="builder-obsidian" class="output-box"></div>
+                    <label style="margin-top: 0.5rem;">HTTPS link (shareable):</label>
+                    <div id="builder-https" class="output-box success"></div>
+                    <div class="btn-group" style="margin-top: 0.5rem;">
+                        <button onclick="copyBuilderHttps()">Copy HTTPS Link<span id="builder-https-feedback" class="copy-feedback">✓ Copied</span></button>
+                        <button class="btn-secondary" onclick="copyBuilderObsidian()">Copy Obsidian Link<span id="builder-obsidian-feedback" class="copy-feedback">✓ Copied</span></button>
+                    </div>
+                </div>
+                </div>
+            </section>
+
+            <footer>
+                Works with <a href="https://obsidian.md" target="_blank">Obsidian</a> and the <a href="https://github.com/Vinzent03/obsidian-advanced-uri" target="_blank">Advanced URI plugin</a>
+                <br>
+                <a href="https://github.com/mitre/obsidianlinks" target="_blank">View source on GitHub</a>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - auto-detect base URL for GitHub Pages
+        // Handles: github.io/reponame/ or custom domains
+        const getBaseUrl = () => {
+            const path = window.location.pathname;
+            // Check if we're on github.io with a repo subpath
+            if (window.location.hostname.includes('github.io')) {
+                const match = path.match(/^\/([^/]+)/);
+                return match ? window.location.origin + '/' + match[1] : window.location.origin;
+            }
+            // Custom domain - no subpath needed
+            return window.location.origin;
+        };
+        const BASE_URL = getBaseUrl();
+
+        let currentLinkType = 'open';
+        let currentObsidianUrl = '';
+        let converterResult = '';
+        let builderObsidianResult = '';
+        let builderHttpsResult = '';
+
+        // Check if we're handling a redirect
+        function init() {
+            const fullPath = window.location.pathname;
+            const search = window.location.search;
+
+            // Strip base path to get the action path
+            // e.g., /obsidianlinks/open -> /open
+            const basePath = fullPath.includes('/obsidianlinks')
+                ? fullPath.replace(/^.*\/obsidianlinks/, '')
+                : fullPath;
+
+            // Check for redirect paths
+            if (basePath === '/open' || basePath === '/adv-uri' || basePath === '/advanced-uri') {
+                const obsidianUrl = 'obsidian:/' + basePath + search;
+                handleRedirect(obsidianUrl);
+            } else if (search && (search.includes('vault=') || search.includes('file='))) {
+                // Handle legacy format: /?vault=X&file=Y
+                const obsidianUrl = 'obsidian://open' + search;
+                handleRedirect(obsidianUrl);
+            }
+            // Otherwise show main UI (default)
+        }
+
+        function handleRedirect(obsidianUrl) {
+            currentObsidianUrl = obsidianUrl;
+            const banner = document.getElementById('redirect-banner');
+            const statusText = document.getElementById('redirect-status');
+
+            banner.classList.remove('hidden');
+            document.getElementById('redirect-link').textContent = obsidianUrl;
+
+            // Attempt redirect
+            window.location.href = obsidianUrl;
+
+            // After 2 seconds, update status
+            setTimeout(() => {
+                statusText.textContent = "The redirect may not have worked. You can copy the link below and open it manually, or check if Obsidian is installed.";
+            }, 2000);
+        }
+
+        function retryRedirect() {
+            window.location.href = currentObsidianUrl;
+        }
+
+        function copyRedirectLink() {
+            navigator.clipboard.writeText(currentObsidianUrl);
+            showCopyFeedback('redirect');
+        }
+
+        function showCopyFeedback(source) {
+            // Create temporary feedback element
+            const banner = document.getElementById('redirect-banner');
+            if (!banner) return;
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✓ Copied';
+            btn.style.background = 'var(--success)';
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 1500);
+        }
+
+        // Converter functions
+        function convertLink() {
+            const input = document.getElementById('obsidian-input').value.trim();
+            const output = document.getElementById('converter-output');
+            const actions = document.getElementById('converter-actions');
+
+            if (!input) {
+                output.textContent = 'Please paste an obsidian:// link';
+                output.classList.remove('hidden', 'success');
+                actions.classList.add('hidden');
+                return;
+            }
+
+            if (!input.startsWith('obsidian://')) {
+                output.textContent = 'Invalid link. Must start with obsidian://';
+                output.classList.remove('hidden', 'success');
+                actions.classList.add('hidden');
+                return;
+            }
+
+            // Parse the obsidian URL
+            const urlPart = input.replace('obsidian:/', '');
+            converterResult = BASE_URL + urlPart;
+
+            output.textContent = converterResult;
+            output.classList.remove('hidden');
+            output.classList.add('success');
+            actions.classList.remove('hidden');
+        }
+
+        function copyConverterResult() {
+            navigator.clipboard.writeText(converterResult);
+            const feedback = document.getElementById('converter-copy-feedback');
+            feedback.classList.add('show');
+            setTimeout(() => feedback.classList.remove('show'), 1500);
+        }
+
+        function testConverterLink() {
+            window.location.href = converterResult;
+        }
+
+        function clearConverter() {
+            document.getElementById('obsidian-input').value = '';
+            document.getElementById('converter-output').classList.add('hidden');
+            document.getElementById('converter-actions').classList.add('hidden');
+        }
+
+        // Builder functions
+        function setLinkType(type) {
+            currentLinkType = type;
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show/hide UID field (only for advanced-uri)
+            document.getElementById('uid-field').style.display = type === 'adv-uri' ? 'block' : 'none';
+        }
+
+        function buildLink() {
+            const vault = document.getElementById('vault').value.trim();
+            const filepath = document.getElementById('filepath').value.trim();
+            const heading = document.getElementById('heading').value.trim();
+            const block = document.getElementById('block').value.trim();
+            const uid = document.getElementById('uid').value.trim();
+
+            if (!vault) {
+                alert('Vault name is required');
+                return;
+            }
+
+            if (!filepath && !uid) {
+                alert('File path or UID is required');
+                return;
+            }
+
+            // Build the URL
+            const params = new URLSearchParams();
+            params.set('vault', vault);
+
+            if (currentLinkType === 'open') {
+                if (filepath) params.set('file', filepath);
+            } else {
+                if (filepath) params.set('filepath', filepath);
+                if (uid) params.set('uid', uid);
+            }
+
+            if (heading) params.set('heading', heading);
+            if (block) params.set('block', block);
+
+            const pathPart = currentLinkType === 'open' ? '/open' : '/adv-uri';
+            builderObsidianResult = 'obsidian:/' + pathPart + '?' + params.toString();
+            builderHttpsResult = BASE_URL + pathPart + '?' + params.toString();
+
+            document.getElementById('builder-obsidian').textContent = builderObsidianResult;
+            document.getElementById('builder-https').textContent = builderHttpsResult;
+            document.getElementById('builder-output').classList.remove('hidden');
+        }
+
+        function copyBuilderHttps() {
+            navigator.clipboard.writeText(builderHttpsResult);
+            const feedback = document.getElementById('builder-https-feedback');
+            feedback.classList.add('show');
+            setTimeout(() => feedback.classList.remove('show'), 1500);
+        }
+
+        function copyBuilderObsidian() {
+            navigator.clipboard.writeText(builderObsidianResult);
+            const feedback = document.getElementById('builder-obsidian-feedback');
+            feedback.classList.add('show');
+            setTimeout(() => feedback.classList.remove('show'), 1500);
+        }
+
+        // Collapsible sections
+        function toggleCollapse(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            if (content && content.classList.contains('collapsible-content')) {
+                content.classList.toggle('collapsed');
+                if (!content.classList.contains('collapsed')) {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            }
+        }
+
+        // Initialize collapsible content heights on load
+        function initCollapsibles() {
+            document.querySelectorAll('.collapsible-content:not(.collapsed)').forEach(content => {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            });
+        }
+
+        // Initialize on load
+        init();
+        initCollapsibles();
+
+        // Register service worker for PWA support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('SW registered:', registration.scope))
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
