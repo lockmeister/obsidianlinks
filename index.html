@@ -229,36 +229,51 @@
             color: white;
         }
 
-        /* Fallback UI */
-        .fallback-ui {
+        /* Redirect Banner */
+        .redirect-banner {
+            background: var(--surface);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
             text-align: center;
-            padding: 2rem;
         }
 
-        .fallback-ui h2 { margin-bottom: 1rem; }
-
-        .fallback-ui .output-box {
-            text-align: left;
-            margin: 1rem 0;
-        }
-
-        .fallback-ui .btn-group {
-            justify-content: center;
-            margin-top: 1rem;
-        }
-
-        .install-links {
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .install-links a {
+        .redirect-banner h2 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
             color: var(--accent);
-            text-decoration: none;
         }
 
-        .install-links a:hover { text-decoration: underline; }
+        .redirect-banner .output-box {
+            text-align: left;
+            margin: 0.75rem 0;
+            font-size: 0.8rem;
+        }
+
+        .redirect-banner .btn-group {
+            justify-content: center;
+            margin-top: 0.75rem;
+        }
+
+        .redirect-banner button {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Copy feedback */
+        .copy-feedback {
+            display: inline-block;
+            margin-left: 0.5rem;
+            color: var(--success);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .copy-feedback.show {
+            opacity: 1;
+        }
 
         footer {
             text-align: center;
@@ -272,12 +287,24 @@
 </head>
 <body>
     <div class="container">
-        <!-- Main UI (shown on root) -->
+        <header>
+            <h1>Obsidian <span>Link Redirector</span></h1>
+            <p class="tagline">Make Obsidian links clickable anywhere</p>
+        </header>
+
+        <!-- Redirect Banner (shown when redirecting) -->
+        <div id="redirect-banner" class="redirect-banner hidden">
+            <h2>Opening Obsidian...</h2>
+            <p id="redirect-status">If nothing happened, Obsidian may not be installed or the link didn't trigger.</p>
+            <div class="output-box" id="redirect-link"></div>
+            <div class="btn-group">
+                <button onclick="copyRedirectLink()">Copy Link</button>
+                <button class="btn-secondary" onclick="retryRedirect()">Try Again</button>
+            </div>
+        </div>
+
+        <!-- Main UI -->
         <div id="main-ui">
-            <header>
-                <h1>Obsidian <span>Link Redirector</span></h1>
-                <p class="tagline">Make Obsidian links clickable anywhere</p>
-            </header>
 
             <!-- Info Section -->
             <section class="info-section">
@@ -320,7 +347,7 @@
                 </div>
                 <div id="converter-output" class="output-box hidden"></div>
                 <div id="converter-actions" class="btn-group hidden" style="margin-top: 0.5rem;">
-                    <button onclick="copyConverterResult()">Copy Link</button>
+                    <button onclick="copyConverterResult()">Copy Link<span id="converter-copy-feedback" class="copy-feedback">✓ Copied</span></button>
                     <button class="btn-secondary" onclick="testConverterLink()">Test Link</button>
                 </div>
             </section>
@@ -369,33 +396,17 @@
                     <label style="margin-top: 0.5rem;">HTTPS link (shareable):</label>
                     <div id="builder-https" class="output-box success"></div>
                     <div class="btn-group" style="margin-top: 0.5rem;">
-                        <button onclick="copyBuilderHttps()">Copy HTTPS Link</button>
-                        <button class="btn-secondary" onclick="copyBuilderObsidian()">Copy Obsidian Link</button>
+                        <button onclick="copyBuilderHttps()">Copy HTTPS Link<span id="builder-https-feedback" class="copy-feedback">✓ Copied</span></button>
+                        <button class="btn-secondary" onclick="copyBuilderObsidian()">Copy Obsidian Link<span id="builder-obsidian-feedback" class="copy-feedback">✓ Copied</span></button>
                     </div>
                 </div>
             </section>
 
             <footer>
                 Works with <a href="https://obsidian.md" target="_blank">Obsidian</a> and the <a href="https://github.com/Vinzent03/obsidian-advanced-uri" target="_blank">Advanced URI plugin</a>
+                <br>
+                <a href="https://github.com/mitre/obsidianlinks" target="_blank">View source on GitHub</a>
             </footer>
-        </div>
-
-        <!-- Fallback UI (shown when redirect doesn't work) -->
-        <div id="fallback-ui" class="fallback-ui hidden">
-            <h2>Opening Obsidian...</h2>
-            <p id="fallback-status">If nothing happened, Obsidian may not be installed or the link didn't trigger.</p>
-
-            <div class="output-box" id="fallback-link"></div>
-
-            <div class="btn-group">
-                <button onclick="copyFallbackLink()">Copy Link</button>
-                <button class="btn-secondary" onclick="retryRedirect()">Try Again</button>
-                <button class="btn-secondary" onclick="showMainUI()">Go to Tool</button>
-            </div>
-
-            <div class="install-links">
-                <p>Don't have Obsidian? <a href="https://obsidian.md/download" target="_blank">Download Obsidian</a></p>
-            </div>
         </div>
     </div>
 
@@ -445,17 +456,18 @@
 
         function handleRedirect(obsidianUrl) {
             currentObsidianUrl = obsidianUrl;
-            document.getElementById('main-ui').classList.add('hidden');
-            document.getElementById('fallback-ui').classList.remove('hidden');
-            document.getElementById('fallback-link').textContent = obsidianUrl;
+            const banner = document.getElementById('redirect-banner');
+            const statusText = document.getElementById('redirect-status');
+
+            banner.classList.remove('hidden');
+            document.getElementById('redirect-link').textContent = obsidianUrl;
 
             // Attempt redirect
             window.location.href = obsidianUrl;
 
             // After 2 seconds, update status
             setTimeout(() => {
-                document.getElementById('fallback-status').textContent =
-                    "The redirect may not have worked. You can copy the link below and open it manually, or check if Obsidian is installed.";
+                statusText.textContent = "The redirect may not have worked. You can copy the link below and open it manually, or check if Obsidian is installed.";
             }, 2000);
         }
 
@@ -463,13 +475,25 @@
             window.location.href = currentObsidianUrl;
         }
 
-        function copyFallbackLink() {
+        function copyRedirectLink() {
             navigator.clipboard.writeText(currentObsidianUrl);
-            alert('Copied to clipboard!');
+            showCopyFeedback('redirect');
         }
 
-        function showMainUI() {
-            window.location.href = BASE_URL;
+        function showCopyFeedback(source) {
+            // Create temporary feedback element
+            const banner = document.getElementById('redirect-banner');
+            if (!banner) return;
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✓ Copied';
+            btn.style.background = 'var(--success)';
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 1500);
         }
 
         // Converter functions
@@ -504,11 +528,13 @@
 
         function copyConverterResult() {
             navigator.clipboard.writeText(converterResult);
-            alert('Copied to clipboard!');
+            const feedback = document.getElementById('converter-copy-feedback');
+            feedback.classList.add('show');
+            setTimeout(() => feedback.classList.remove('show'), 1500);
         }
 
         function testConverterLink() {
-            window.open(converterResult, '_blank');
+            window.location.href = converterResult;
         }
 
         function clearConverter() {
@@ -569,12 +595,16 @@
 
         function copyBuilderHttps() {
             navigator.clipboard.writeText(builderHttpsResult);
-            alert('Copied to clipboard!');
+            const feedback = document.getElementById('builder-https-feedback');
+            feedback.classList.add('show');
+            setTimeout(() => feedback.classList.remove('show'), 1500);
         }
 
         function copyBuilderObsidian() {
             navigator.clipboard.writeText(builderObsidianResult);
-            alert('Copied to clipboard!');
+            const feedback = document.getElementById('builder-obsidian-feedback');
+            feedback.classList.add('show');
+            setTimeout(() => feedback.classList.remove('show'), 1500);
         }
 
         // Initialize on load
