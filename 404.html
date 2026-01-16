@@ -522,9 +522,9 @@
                 const obsidianUrl = 'obsidian:/' + basePath + search;
                 handleRedirect(obsidianUrl);
             } else if (basePath.startsWith('/pid/')) {
-                // pxd ID lookup: /pid/pxk8f3m2n → obsidian://search?vault=life&query=pid:pxk8f3m2n
+                // pxd ID lookup: /pid/pxk8f3m2n → obsidian://search?vault=life&query=pxk8f3m2n
                 const pxdId = basePath.slice(5); // remove '/pid/'
-                const obsidianUrl = 'obsidian://search?vault=life&query=pid:' + pxdId;
+                const obsidianUrl = 'obsidian://search?vault=life&query=' + pxdId;
                 handleRedirect(obsidianUrl);
             } else if (search && (search.includes('vault=') || search.includes('file='))) {
                 // Handle legacy format: /?vault=X&file=Y
