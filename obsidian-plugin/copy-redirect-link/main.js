@@ -159,7 +159,8 @@ module.exports = class CopyRedirectLinkPlugin extends Plugin {
     });
     const port = await listenHighPort(server);
     const callbackUrl = `http://127.0.0.1:${port}/callback`;
-    const connectUrl = `${PUBLIC_ORIGIN}/obsidian/connect?callback=${encodeURIComponent(callbackUrl)}&state=${encodeURIComponent(state)}&name=${encodeURIComponent(os.hostname() + ' Obsidian')}`;
+    const request = Buffer.from(JSON.stringify({ callback: callbackUrl, state, name: `${os.hostname()} Obsidian` })).toString('base64url');
+    const connectUrl = `${PUBLIC_ORIGIN}/obsidian/connect#request=${request}`;
     await shell.openExternal(connectUrl);
     new Notice('Approve the Obsidian connection in your browser');
     const timer = setTimeout(() => { server.close(); finish.reject(new Error('Connection timed out after five minutes')); }, 300000);
