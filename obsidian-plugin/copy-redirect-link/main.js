@@ -7,7 +7,7 @@ const os = require('os');
 const { shell } = require('electron');
 
 const REDIRECT_BASE = 'https://lockmeister.github.io/obsidianlinks';
-const CONNECT_ORIGIN = 'https://share-content.lockystoys.com';
+const CONNECT_ORIGIN = 'https://locky-share.thelockmeister.workers.dev';
 const API_ORIGIN = 'https://share-api.lockystoys.com';
 const SECRET_ID = 'locky-share-obsidian-token';
 const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'avif']);
