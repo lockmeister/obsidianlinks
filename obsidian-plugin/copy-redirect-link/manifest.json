@@ -1,9 +1,9 @@
 {
   "id": "copy-redirect-link",
   "name": "Copy Redirect Link",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "minAppVersion": "0.15.0",
-  "description": "Copy HTTPS redirect link for current note",
+  "description": "Copy universal links and privately publish one or more notes through Locky Share",
   "author": "You",
-  "isDesktopOnly": false
+  "isDesktopOnly": true
 }

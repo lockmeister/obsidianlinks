@@ -1,64 +1,39 @@
-# Obsidian Plugin: Copy Redirect Link
+# Obsidian Plugin: Universal Links and Locky Share
 
-Copy shareable HTTPS redirect links directly from Obsidian with a hotkey.
+One desktop plugin with two separate jobs:
+
+1. Copy HTTPS redirect links that open a note in the owner's local Obsidian vault.
+2. Publish portable, private copies of one or more notes through Locky Share.
 
 ## Installation
 
-1. **Download the plugin folder:**
-   - [Download copy-redirect-link folder](https://github.com/mitre/obsidianlinks/tree/master/obsidian-plugin/copy-redirect-link)
-   - Click "Code" → "Download ZIP" from the repo, then extract the `obsidian-plugin/copy-redirect-link` folder
+Copy `copy-redirect-link/` into the vault's `.obsidian/plugins/` directory, enable **Copy Redirect Link**, then reload Obsidian.
 
-2. **Copy to your vault:**
-   - Find your vault's `.obsidian/plugins/` folder
-   - If you can't see `.obsidian`, enable "Show hidden files" in your file explorer
-   - Copy the `copy-redirect-link` folder into `.obsidian/plugins/`
+## Universal redirect links
 
-3. **Enable the plugin:**
-   - Restart Obsidian
-   - Go to Settings → Community plugins
-   - Scroll down and toggle ON "Copy Redirect Link"
+Commands:
 
-4. **Set a hotkey:**
-   - Go to Settings → Hotkeys
-   - Search for "Copy HTTPS redirect"
-   - Click the + button and assign your preferred hotkey (e.g., `Cmd+Shift+L`)
+- **Copy HTTPS redirect link**
+- **Copy HTTPS redirect link (Advanced URI)**
 
-## Usage
+The existing `Cmd+Shift+L` hotkey can remain assigned to either command. These links redirect to the local `obsidian://` protocol; they do not expose note content.
 
-1. Open any note in Obsidian
-2. Press your hotkey
-3. The HTTPS redirect link is now in your clipboard
-4. Paste it into Google Tasks, GitHub, Slack, etc.
+## Private Locky Share pages
 
-## Two Commands
+- Open a note and run **Share current note via Locky Share…**.
+- Or select one or more notes/folders in the file explorer, right-click, and select **Share … via Locky Share…**.
+- Enter recipient emails and publish.
+- Multiple notes become one navigable page with one URL.
+- Embedded images are copied into the rendered page.
+- Re-sharing the same note or exact note selection updates the existing URL and replaces its recipient list.
 
-- **Copy HTTPS redirect link** - Standard format (most common)
-- **Copy HTTPS redirect link (Advanced URI)** - For Advanced URI plugin users
+The first publish on each computer opens a browser approval page. The resulting credential can only create and update Obsidian publications; it cannot read ordinary shares, files, or Wormholes. It is stored through Obsidian's encrypted SecretStorage and is never written into the vault or plugin data.
 
-You can assign hotkeys to both or just the one you need.
+Published pages are manual snapshots. Later note edits remain private until **Update shared copy** is selected.
 
-## What Links Look Like
+## Security
 
-Standard:
-```
-https://lockmeister.github.io/obsidianlinks/open?vault=MyVault&file=My%20Note
-```
-
-Advanced URI:
-```
-https://lockmeister.github.io/obsidianlinks/adv-uri?vault=MyVault&filepath=My%20Note
-```
-
-## Customization
-
-If you're using a custom domain instead of GitHub Pages, edit `main.js` and change:
-
-```javascript
-const REDIRECT_BASE = "https://lockmeister.github.io/obsidianlinks";
-```
-
-to your domain:
-
-```javascript
-const REDIRECT_BASE = "https://your-domain.com";
-```
+- Always review selected note paths and recipient emails in the confirmation dialog.
+- Publishing is private by default and requires at least one recipient email.
+- Scripts, forms, iframes, objects, and inline event handlers are removed from rendered notes.
+- Internal links only remain clickable when the target note is included in the same publication.
