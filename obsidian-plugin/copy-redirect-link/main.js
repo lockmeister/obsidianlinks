@@ -7,7 +7,7 @@ const os = require('os');
 const { shell } = require('electron');
 
 const REDIRECT_BASE = 'https://lockmeister.github.io/obsidianlinks';
-const PUBLIC_ORIGIN = 'https://share.lockystoys.com';
+const CONNECT_ORIGIN = 'https://share-content.lockystoys.com';
 const API_ORIGIN = 'https://share-api.lockystoys.com';
 const SECRET_ID = 'locky-share-obsidian-token';
 const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'avif']);
@@ -160,7 +160,7 @@ module.exports = class CopyRedirectLinkPlugin extends Plugin {
     const port = await listenHighPort(server);
     const callbackUrl = `http://127.0.0.1:${port}/callback`;
     const request = Buffer.from(JSON.stringify({ callback: callbackUrl, state, name: `${os.hostname()} Obsidian` })).toString('base64url');
-    const connectUrl = `${PUBLIC_ORIGIN}/obsidian/connect#request=${request}`;
+    const connectUrl = `${CONNECT_ORIGIN}/obsidian/connect#request=${request}`;
     await shell.openExternal(connectUrl);
     new Notice('Approve the Obsidian connection in your browser');
     const timer = setTimeout(() => { server.close(); finish.reject(new Error('Connection timed out after five minutes')); }, 300000);
