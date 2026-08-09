@@ -29,7 +29,7 @@ The existing `Cmd+Shift+L` hotkey can remain assigned to either command. These l
 
 The first publish on each computer opens a browser approval page. The resulting credential can only create and update Obsidian publications; it cannot read ordinary shares, files, or Wormholes. It is stored through Obsidian's encrypted SecretStorage and is never written into the vault or plugin data.
 
-Published pages are manual snapshots. Later note edits remain private until **Update shared copy** is selected.
+Published pages are manual snapshots. Later note edits remain private until **Update shared copy** is selected. Use **Disconnect Locky Share publishing on this computer** to revoke the local scoped credential.
 
 ## Security
 

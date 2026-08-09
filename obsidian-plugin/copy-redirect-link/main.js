@@ -93,6 +93,14 @@ module.exports = class CopyRedirectLinkPlugin extends Plugin {
         return true;
       },
     });
+    this.addCommand({
+      id: 'disconnect-locky-share', name: 'Disconnect Locky Share publishing on this computer',
+      checkCallback: (checking) => {
+        const connected = Boolean(this.app.secretStorage?.getSecret(SECRET_ID));
+        if (connected && !checking) this.disconnect().catch((error) => new Notice(`Locky Share: ${error.message || error}`));
+        return connected;
+      },
+    });
     this.registerEvent(this.app.workspace.on('file-menu', (menu, file) => {
       const files = this.collectMarkdown([file]);
       if (files.length) menu.addItem((item) => item.setTitle('Share via Locky Share…').setIcon('share-2').onClick(() => this.openShare(files)));
@@ -169,6 +177,15 @@ module.exports = class CopyRedirectLinkPlugin extends Plugin {
       this.app.secretStorage.setSecret(SECRET_ID, token);
       return token;
     } finally { clearTimeout(timer); }
+  }
+
+  async disconnect() {
+    const token = this.app.secretStorage?.getSecret(SECRET_ID);
+    if (!token) return;
+    const response = await requestUrl({ url: `${API_ORIGIN}/api/obsidian/device`, method: 'DELETE', headers: { Authorization: `Bearer ${token}` }, throw: false });
+    if (response.status < 200 || response.status >= 300) throw new Error(response.json?.error || `service returned ${response.status}`);
+    this.app.secretStorage.deleteSecret(SECRET_ID);
+    new Notice('Locky Share publishing disconnected on this computer');
   }
 
   async api(method, route, body) {
